@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { PasienPenyedia, usePasien } from '../../context/PasienAuthContext'
 import { Memuat } from '../../components/ui/Dasar'
@@ -9,9 +9,13 @@ import Dashboard from './Dashboard'
 import ReservasiBaru from './ReservasiBaru'
 import Paket from './Paket'
 import Pesanan from './Pesanan'
+import VerifikasiRM from './VerifikasiRM'
 
 function Isi() {
   const { profil, siap } = usePasien()
+  const [lewatiVerif, setLewatiVerif] = useState(() => {
+    try { return sessionStorage.getItem('pasien.verif.lewati') === '1' } catch { return false }
+  })
 
   if (!siap) return <div style={{ padding: 48 }}><Memuat tinggi={200} /></div>
 
@@ -25,6 +29,11 @@ function Isi() {
         <Route path="*" element={<SimpanLaluMasuk />} />
       </Routes>
     )
+  }
+
+  // Gerbang saat awal masuk: verifikasi rekam medik bila No. RM belum tertaut.
+  if (!profil.no_mr && !lewatiVerif) {
+    return <VerifikasiRM onSelesai={() => setLewatiVerif(true)} />
   }
 
   // Sudah masuk: portal berkerangka.

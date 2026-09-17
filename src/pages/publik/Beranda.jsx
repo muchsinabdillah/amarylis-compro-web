@@ -27,7 +27,7 @@ export default function Beranda() {
   })
 
   const layanan = useMuat((o) => publik.daftar('services', { per_halaman: 6 }, o), [])
-  const paket   = useMuat((o) => publik.paket(undefined, o), [])   // paket sinkron SIMRS (tanpa entri ulang)
+  const mcu     = useMuat((o) => publik.daftar('mcu', { per_halaman: 6 }, o), [])   // konten CMS (berisi detail)
   const dokter  = useMuat((o) => publik.dokter(o), [])
   const artikel = useMuat((o) => publik.daftar('articles', { per_halaman: 3 }, o), [])
 
@@ -136,21 +136,21 @@ export default function Beranda() {
         <div className="wadah">
           <div className="baris baris--antara judul-seksi" style={{ maxWidth: 'none' }}>
             <div>
-              <span className="eyebrow">Paket & Medical Check Up</span>
-              <h2>Paket pemeriksaan & layanan</h2>
+              <span className="eyebrow">Medical Check Up</span>
+              <h2>Paket pemeriksaan berkala</h2>
             </div>
-            <Link to="/pasien/paket" className="btn btn--garis btn--kecil">Pesan paket</Link>
+            <Link to="/mcu" className="btn btn--garis btn--kecil">Semua paket</Link>
           </div>
 
-          {paket.memuat ? <KartuRangka jumlah={3} />
-            : paket.data?.length ? (
+          {mcu.memuat ? <KartuRangka jumlah={3} />
+            : mcu.data?.length ? (
               <Reveal className="kisi kisi--3">
-                {paket.data.slice(0, 6).map((p) => <KartuPaket key={p.id} p={p} wa={wa} />)}
+                {mcu.data.map((p) => <KartuKonten key={p.id} modul="mcu" item={p} />)}
               </Reveal>
             ) : (
               <div className="kosong">
-                <h3>Paket belum tersedia</h3>
-                <p>Paket dari SIMRS belum tersinkron. Buka CMS → Sinkron untuk menariknya.</p>
+                <h3>Paket MCU belum ditayangkan</h3>
+                <p>Tambahkan di CMS → Paket MCU (impor dari SIMRS), lalu tandai <b>Tayang</b>.</p>
               </div>
             )}
         </div>
@@ -255,35 +255,3 @@ function AksiCepat({ ke, judul, teks, ikon, utama }) {
   )
 }
 
-/* Kartu paket dari data SINKRON SIMRS (service_packages) — bukan entri ulang CMS. */
-const JENIS_PAKET = { mcu: 'MCU', homecare: 'Homecare', lainnya: 'Layanan' }
-function KartuPaket({ p, wa }) {
-  const harga = p.harga_simrs == null || p.harga_simrs === ''
-    ? 'Hubungi klinik' : 'Rp ' + Number(p.harga_simrs).toLocaleString('id-ID')
-  return (
-    <article className="kartu" style={{ padding: 'var(--s-4)', display: 'flex', flexDirection: 'column', gap: 'var(--s-2)' }}>
-      <div className="baris baris--antara" style={{ alignItems: 'flex-start', gap: 'var(--s-2)' }}>
-        <h3 style={{ fontSize: 'var(--t-base)' }}>{p.nama}</h3>
-        <span className="lencana">{JENIS_PAKET[p.jenis] || 'Layanan'}</span>
-      </div>
-      <div className="baris" style={{ gap: 'var(--s-5)', marginTop: 'auto', paddingTop: 'var(--s-2)' }}>
-        <div>
-          <div style={{ fontSize: 'var(--t-xs)', color: 'var(--teks-samar)' }}>Harga</div>
-          <strong style={{ color: 'var(--hijau-700)' }}>{harga}</strong>
-        </div>
-        <div>
-          <div style={{ fontSize: 'var(--t-xs)', color: 'var(--teks-samar)' }}>Kunjungan</div>
-          <strong>{(p.jml_kunjungan || 1)}×</strong>
-        </div>
-      </div>
-      <div className="baris" style={{ gap: 'var(--s-2)', marginTop: 'var(--s-2)', flexWrap: 'wrap' }}>
-        <Link to="/pasien/paket" className="btn btn--kecil">Pesan</Link>
-        {(p.whatsapp || wa) && (
-          <a className="btn btn--wa btn--kecil" href={p.whatsapp || wa} target="_blank" rel="noopener noreferrer">
-            Tanya WhatsApp
-          </a>
-        )}
-      </div>
-    </article>
-  )
-}

@@ -28,6 +28,12 @@ const KATALOG = ['services', 'mcu', 'homecare']
 
 const escHtml = (s) => String(s || '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]))
 
+/** Buat slug dari teks: huruf kecil, non-alfanumerik jadi tanda hubung. */
+const buatSlug = (s) => (s || '').toString().toLowerCase()
+  .normalize('NFKD').replace(/[̀-ͯ]/g, '')   // buang aksen
+  .replace(/[^a-z0-9\s-]/g, '')
+  .trim().replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '')
+
 /** Rangkai deskripsi awal dari detail paket SIMRS (keterangan + jumlah kunjungan + isi). */
 function bangunDeskripsi(d) {
   const bagian = []
@@ -67,12 +73,14 @@ export default function FormKonten() {
     [modul])
   const [imporSibuk, setImporSibuk] = useState(false)
   const [imporPesan, setImporPesan] = useState(null)
+  const [detailPaket, setDetailPaket] = useState(null)   // detail (isi) paket dari SIMRS
 
   const impor = async (simrsId) => {
     if (!simrsId) return
     setImporSibuk(true); setImporPesan(null)
     try {
       const { data: d } = await admin.paketSimrsDetail(simrsId)
+      setDetailPaket(d)
       const isi = bangunDeskripsi(d)
       setF((v) => ({
         ...v,
@@ -80,6 +88,8 @@ export default function FormKonten() {
         harga: d.harga != null && d.harga !== '' ? Number(d.harga) : v.harga,
         jenis_harga: d.harga != null && d.harga !== '' ? 'fixed' : 'contact_us',
         paket_id: d.simrs_id,
+        // Slug ikut terisi dari nama paket (bila konten baru & belum disunting).
+        slug: (baru && !slugManual) ? buatSlug(d.nama || '') : v.slug,
         ringkas: (v.ringkas && v.ringkas.trim())
           ? v.ringkas
           : `${d.jml_kunjungan || 1}× kunjungan${d.items?.length ? ` · ${d.items.length} pemeriksaan` : ''}`,
@@ -110,6 +120,20 @@ export default function FormKonten() {
   const setCentang = (kunci) => (e) => set(kunci)(e.target.checked)
 
   const kolomJudul = ['articles', 'news', 'videos'].includes(modul) ? 'judul' : 'nama'
+
+  // Slug terisi otomatis dari judul selama pengguna belum menyuntingnya sendiri.
+  // Hanya untuk konten BARU (mengubah slug konten lama memutus tautan lama).
+  const [slugManual, setSlugManual] = useState(false)
+  const ubahJudul = (e) => {
+    const v = e.target.value
+    setF((prev) => {
+      const next = { ...prev, [kolomJudul]: v }
+      if (baru && !slugManual) next.slug = buatSlug(v)
+      return next
+    })
+    setTersimpan(false)
+  }
+  const ubahSlug = (e) => { setSlugManual(true); set('slug')(buatSlug(e.target.value)) }
 
   const simpan = async (e) => {
     e.preventDefault()
@@ -196,7 +220,26 @@ export default function FormKonten() {
                 <Info corak="awas">Belum ada paket sinkron. Buka menu <b>Sinkronisasi</b> untuk menariknya dari SIMRS.</Info>
               )}
               {imporPesan && <div style={{ marginTop: 'var(--s-2)' }}><Info corak="sukses">{imporPesan}</Info></div>}
-              {f.paket_id && (
+
+              {/* Pratinjau detail paket (isi) — juga otomatis masuk ke Keterangan lengkap. */}
+              {detailPaket && (detailPaket.items || []).length > 0 && (
+                <div style={{ marginTop: 'var(--s-3)', border: '1px solid var(--garis)', borderRadius: 'var(--r-md)', padding: 'var(--s-3)', background: 'var(--hijau-50)' }}>
+                  <div style={{ fontSize: 'var(--t-xs)', fontWeight: 700, color: 'var(--hijau-800)', marginBottom: 6 }}>
+                    Detail paket — {detailPaket.jml_kunjungan || 1}× kunjungan
+                    {detailPaket.harga ? ` · Rp ${Number(detailPaket.harga).toLocaleString('id-ID')}` : ''}
+                  </div>
+                  <ul style={{ margin: 0, paddingLeft: '1.1em', fontSize: 'var(--t-sm)', color: 'var(--teks-lembut)' }}>
+                    {detailPaket.items.map((it, i) => (
+                      <li key={i}>{it.nama}{Number(it.qty) > 1 ? ` (${Number(it.qty)}×)` : ''}</li>
+                    ))}
+                  </ul>
+                  <div style={{ fontSize: 'var(--t-xs)', color: 'var(--teks-samar)', marginTop: 6 }}>
+                    Detail ini otomatis dimasukkan ke <b>Keterangan lengkap</b> dan tampil di website.
+                  </div>
+                </div>
+              )}
+
+              {f.paket_id && !detailPaket && (
                 <div style={{ marginTop: 'var(--s-2)', fontSize: 'var(--t-xs)', color: 'var(--teks-samar)' }}>
                   Tertaut ke paket SIMRS #{f.paket_id}
                 </div>
@@ -211,7 +254,7 @@ export default function FormKonten() {
                 wajib
                 required
                 value={f[kolomJudul] || ''}
-                onChange={setEv(kolomJudul)}
+                onChange={ubahJudul}
                 galat={galatKolom[kolomJudul]}
                 maxLength={220}
               />
@@ -342,9 +385,9 @@ export default function FormKonten() {
               <Teks
                 label="Slug URL"
                 value={f.slug || ''}
-                onChange={setEv('slug')}
+                onChange={ubahSlug}
                 bantuan={baru
-                  ? 'Kosongkan agar dibuat otomatis dari judul.'
+                  ? 'Terisi otomatis dari judul; boleh disunting.'
                   : 'Mengubah slug memutus tautan lama yang sudah tersebar.'}
                 galat={galatKolom.slug}
               />
@@ -378,7 +421,7 @@ export default function FormKonten() {
                   label="Harga"
                   type="number"
                   min="0"
-                  step="1000"
+                  step="any"
                   value={f.harga ?? ''}
                   onChange={setEv('harga')}
                   bantuan="Kosongkan bila harga belum ditentukan — situs akan menulis “Hubungi kami”."
