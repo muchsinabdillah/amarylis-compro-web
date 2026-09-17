@@ -1,0 +1,212 @@
+.cms {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr;
+  background: var(--abu-100);
+}
+
+/* ---------------------------------------------------------------- sisi */
+.cms__sisi {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: 264px;
+  z-index: 60;
+  background: var(--hijau-950);
+  color: var(--abu-300);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-100%);
+  transition: transform var(--gerak);
+}
+.cms__sisi--buka { transform: translateX(0); }
+
+.cms__merek {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-5) var(--s-4);
+  border-bottom: 1px solid var(--hijau-900);
+  color: var(--putih);
+}
+.cms__merek small { display: block; color: var(--abu-500); font-size: var(--t-xs); }
+
+.cms__lambang {
+  width: 36px; height: 36px;
+  display: grid; place-items: center;
+  background: var(--hijau-600);
+  border-radius: var(--r-md);
+  font-size: 1.4rem; font-weight: 700; line-height: 1;
+  flex-shrink: 0;
+}
+
+/*
+ * Seluruh menu harus muat tanpa digulir pada layar 1080p.
+ *
+ * Panel gelap tanpa bilah gulir yang terlihat membuat menu di bawah lipatan
+ * praktis tidak ada — dan yang paling mudah tersembunyi justru dua yang
+ * paling jarang dibuka sekaligus paling penting: Pengaturan Situs dan
+ * Pengguna & Peran. Karena itu jaraknya dirapatkan, bukan diserahkan pada
+ * gulir.
+ */
+.cms__menu { flex: 1; overflow-y: auto; padding: var(--s-3); }
+
+.cms__grup + .cms__grup { margin-top: var(--s-4); }
+.cms__grup-judul {
+  display: block;
+  padding: 0 var(--s-3) 0.35rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--abu-600);
+}
+
+.cms__tautan {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: 0.45rem var(--s-3);
+  border-radius: var(--r-md);
+  color: var(--abu-300);
+  font-size: var(--t-sm);
+  font-weight: 500;
+}
+.cms__tautan:hover { background: var(--hijau-900); color: var(--putih); text-decoration: none; }
+.cms__tautan--aktif { background: var(--hijau-700); color: var(--putih); font-weight: 600; }
+
+.cms__ikon { width: 18px; text-align: center; opacity: 0.9; }
+
+.cms__kaki-sisi {
+  padding: var(--s-3);
+  border-top: 1px solid var(--hijau-900);
+  /*
+   * Bayangan ke atas menjadi petunjuk bahwa daftar menu di atasnya masih
+   * berlanjut. Pada jendela pendek menu memang tidak muat dan harus digulir;
+   * tanpa isyarat apa pun, menu yang berada di bawah lipatan terbaca sebagai
+   * menu yang tidak ada.
+   */
+  box-shadow: 0 -10px 14px -10px rgba(0, 0, 0, 0.85);
+}
+
+.cms__tirai {
+  position: fixed; inset: 0; z-index: 55;
+  background: rgba(8, 34, 28, 0.45);
+  border: 0; cursor: pointer;
+}
+
+/* --------------------------------------------------------------- utama */
+.cms__utama { display: flex; flex-direction: column; min-width: 0; }
+
+.cms__atas {
+  position: sticky; top: 0; z-index: 40;
+  height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--s-4);
+  padding-inline: var(--s-4);
+  background: var(--putih);
+  border-bottom: 1px solid var(--garis);
+}
+
+.cms__hamburger {
+  width: 40px; height: 40px;
+  border: 1px solid var(--garis);
+  border-radius: var(--r-md);
+  background: var(--putih);
+  cursor: pointer;
+  font-size: 1.1rem;
+}
+
+.cms__atas-kanan { display: flex; align-items: center; gap: var(--s-3); margin-left: auto; }
+.cms__pengguna { text-align: right; line-height: 1.25; }
+.cms__pengguna strong { display: block; font-size: var(--t-sm); }
+.cms__pengguna small { color: var(--teks-samar); font-size: var(--t-xs); }
+
+.cms__isi { padding: var(--s-5) var(--s-4) var(--s-8); }
+
+/* -------------------------------------------------------------- bagian */
+.cms-panel {
+  background: var(--putih);
+  border: 1px solid var(--garis);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+}
+.cms-panel + .cms-panel { margin-top: var(--s-5); }
+.cms-panel__judul {
+  font-size: var(--t-lg);
+  margin-bottom: var(--s-4);
+  padding-bottom: var(--s-3);
+  border-bottom: 1px solid var(--garis);
+}
+
+.cms-kepala {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: var(--s-4); flex-wrap: wrap;
+  margin-bottom: var(--s-5);
+}
+.cms-kepala h1 { font-size: var(--t-2xl); }
+.cms-kepala p { color: var(--teks-lembut); font-size: var(--t-sm); margin-top: 4px; }
+
+/* --------------------------------------------------------------- tabel */
+.tabel { width: 100%; border-collapse: collapse; font-size: var(--t-sm); }
+.tabel th, .tabel td { padding: var(--s-3); text-align: left; border-bottom: 1px solid var(--garis); }
+.tabel th {
+  background: var(--abu-100);
+  font-size: var(--t-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--teks-lembut);
+  white-space: nowrap;
+}
+.tabel tbody tr:hover { background: var(--hijau-50); }
+.tabel td.angka, .tabel th.angka { text-align: right; }
+.tabel td.angka { font-variant-numeric: tabular-nums; }
+.tabel__aksi { display: flex; gap: var(--s-2); justify-content: flex-end; }
+
+/* --------------------------------------------------------- kartu angka */
+.angka-kisi { display: grid; gap: var(--s-4); grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+.angka-kartu {
+  background: var(--putih);
+  border: 1px solid var(--garis);
+  border-left: 4px solid var(--hijau-600);
+  border-radius: var(--r-md);
+  padding: var(--s-4);
+}
+.angka-kartu__label { font-size: var(--t-xs); color: var(--teks-lembut); text-transform: uppercase; letter-spacing: 0.06em; }
+.angka-kartu__nilai { font-size: var(--t-2xl); font-weight: 800; color: var(--hijau-800); line-height: 1.2; }
+.angka-kartu__kaki { font-size: var(--t-xs); color: var(--teks-samar); }
+
+/* ------------------------------------------------------------ responsif */
+@media (min-width: 1024px) {
+  .cms { grid-template-columns: 264px 1fr; }
+
+  .cms__sisi {
+    position: sticky;
+    /*
+     * `inset` HARUS ditulis sebelum `top`.
+     *
+     * Ia pemendekan dari top/right/bottom/left, jadi menulisnya setelah
+     * `top: 0` akan mengembalikan `top` menjadi `auto` — dan elemen sticky
+     * dengan top:auto tidak pernah melekat sama sekali. Menu samping lalu
+     * ikut tergulir habis begitu halaman digulir, dan yang tertinggal di
+     * layar hanya potongan bawahnya.
+     */
+    inset: auto;
+    top: 0;
+    height: 100vh;
+    transform: none;
+  }
+
+  .cms__hamburger, .cms__tirai { display: none; }
+  .cms__isi { padding-inline: var(--s-6); }
+  .cms__atas { padding-inline: var(--s-6); }
+}
+
+/* ----------------------------------------------------- formulir panjang */
+.form-kisi { display: grid; gap: var(--s-5); align-items: start; }
+
+@media (min-width: 1100px) {
+  .form-kisi { grid-template-columns: minmax(0, 1fr) 360px; }
+  /* Kolom samping menempel: status, kategori, dan harga adalah hal yang
+     paling sering ditengok saat menulis isi di kolom kiri. */
+  .form-kisi > :last-child { position: sticky; top: calc(64px + var(--s-4)); }
+}

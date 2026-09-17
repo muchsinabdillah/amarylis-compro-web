@@ -1,0 +1,103 @@
+/*
+ * TANPA `overflow: hidden`.
+ *
+ * Bilah alat di dalamnya bersifat sticky. Induk yang memakai overflow selain
+ * `visible` menjadi wadah gulirnya sendiri, sehingga bilah itu berhenti
+ * melekat ke layar dan justru mengambang di tempat yang salah di tengah kotak
+ * editor. Sudut membulatnya karena itu dipasang pada bagian-bagiannya, bukan
+ * dengan memotong isi.
+ */
+.editor {
+  border: 1px solid var(--garis-tegas);
+  border-radius: var(--r-md);
+  background: var(--putih);
+}
+
+/* Bilah alat menempel saat isi digulir: pada artikel panjang, tombol format
+   yang tertinggal di puncak halaman praktis tidak terpakai. */
+.editor__bilah {
+  position: sticky;
+  top: 64px;
+  z-index: 10;
+  display: flex;
+  /*
+   * Satu baris, digeser bila sempit — bukan dibungkus ke baris kedua.
+   *
+   * Bilah yang membungkus membuat tingginya berubah-ubah mengikuti lebar
+   * kolom, dan pada lebar tertentu satu-dua tombol terakhir turun sendirian
+   * sehingga terbaca seperti tata letak yang rusak.
+   */
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  align-items: center;
+  gap: 2px;
+  padding: var(--s-2);
+  background: var(--abu-100);
+  border-bottom: 1px solid var(--garis);
+  border-radius: calc(var(--r-md) - 1px) calc(var(--r-md) - 1px) 0 0;
+}
+
+.editor__tombol {
+  flex: 0 0 auto;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 0.4rem;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--abu-700);
+  font-size: var(--t-xs);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--gerak), color var(--gerak);
+}
+.editor__tombol:hover { background: var(--putih); border-color: var(--garis); }
+.editor__tombol--aktif { background: var(--hijau-700); color: var(--putih); }
+
+.editor__pisah {
+  flex: 0 0 auto;
+  width: 1px;
+  height: 20px;
+  margin-inline: var(--s-1);
+  background: var(--garis-tegas);
+}
+
+.editor__isi {
+  padding: var(--s-4) var(--s-5);
+  border-radius: 0 0 calc(var(--r-md) - 1px) calc(var(--r-md) - 1px);
+}
+
+/* Area sunting memakai gaya baca yang sama dengan halaman publik, supaya
+   yang terlihat saat menulis mendekati yang dilihat pembaca. */
+.editor__isi .ProseMirror {
+  outline: none;
+  min-height: inherit;
+  font-size: var(--t-base);
+  line-height: 1.7;
+}
+.editor__isi .ProseMirror > * + * { margin-top: var(--s-4); }
+.editor__isi .ProseMirror h2 { font-size: var(--t-xl); margin-top: var(--s-6); }
+.editor__isi .ProseMirror h3 { font-size: var(--t-lg); margin-top: var(--s-5); }
+.editor__isi .ProseMirror ul,
+.editor__isi .ProseMirror ol { padding-left: 1.4em; }
+.editor__isi .ProseMirror img { max-width: 100%; border-radius: var(--r-md); }
+.editor__isi .ProseMirror blockquote {
+  border-left: 4px solid var(--hijau-500);
+  background: var(--hijau-50);
+  padding: var(--s-3) var(--s-4);
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+  font-style: italic;
+}
+.editor__isi .ProseMirror a { color: var(--hijau-700); text-decoration: underline; }
+
+/* Petunjuk isian kosong; tanpa ini area sunting yang kosong tak terbedakan
+   dari area yang gagal dimuat. */
+.editor__isi .ProseMirror p.is-editor-empty:first-child::before {
+  content: 'Tulis isi di sini…';
+  float: left;
+  height: 0;
+  color: var(--teks-samar);
+  pointer-events: none;
+}

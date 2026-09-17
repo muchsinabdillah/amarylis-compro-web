@@ -1,0 +1,232 @@
+/**
+ * Satu pintu ke backend.
+ *
+ * Seluruh komponen memanggil lewat berkas ini — bukan `fetch` sendiri-sendiri.
+ * Dengan begitu penanganan token, bentuk galat, dan pembatalan permintaan
+ * ditulis sekali; komponen yang memanggil fetch langsung akan melewatkan
+ * salah satunya, dan yang terlewat biasanya penanganan galatnya.
+ */
+
+const DASAR = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '')
+
+const KUNCI_TOKEN = 'compro.token'
+const KUNCI_TOKEN_PASIEN = 'compro.pasien.token'
+
+/* Penyimpanan token generik agar admin & pasien tak berbagi satu slot: admin
+   dan pasien bisa masuk berbarengan di peramban yang sama tanpa saling
+   mengeluarkan. Token dipilih per-jalur di panggil(). */
+function bikinToken(kunci) {
+  return {
+    ambil: () => { try { return localStorage.getItem(kunci) } catch { return null } },
+    simpan: (v) => { try { localStorage.setItem(kunci, v) } catch { /* diabaikan */ } },
+    hapus: () => { try { localStorage.removeItem(kunci) } catch { /* diabaikan */ } },
+  }
+}
+
+/* -------------------------------------------------------------- token */
+export const token = bikinToken(KUNCI_TOKEN)          // admin CMS
+export const tokenPasien = bikinToken(KUNCI_TOKEN_PASIEN) // portal pasien
+
+/* -------------------------------------------------------------- galat */
+export class GalatApi extends Error {
+  constructor(pesan, status, rincian = {}) {
+    super(pesan)
+    this.name = 'GalatApi'
+    this.status = status
+    this.rincian = rincian
+  }
+
+  /** Galat validasi per kolom, untuk ditempelkan di bawah isian formulir. */
+  get perKolom() {
+    return this.status === 422 ? this.rincian : {}
+  }
+}
+
+/* Dipasang AuthContext supaya token kedaluwarsa langsung mengeluarkan
+   pengguna, di mana pun permintaannya terjadi. Terpisah admin vs pasien agar
+   401 di satu area tidak mengeluarkan yang lain. */
+let saatTakSah = null
+let saatTakSahPasien = null
+export function pasangPenanganTakSah(fn) { saatTakSah = fn }
+export function pasangPenanganTakSahPasien(fn) { saatTakSahPasien = fn }
+
+/* ------------------------------------------------------------ inti */
+async function panggil(metode, jalur, { body, params, signal, formData } = {}) {
+  let url = DASAR + jalur
+  if (params) {
+    const q = new URLSearchParams()
+    Object.entries(params).forEach(([k, v]) => {
+      if (v !== undefined && v !== null && v !== '') q.append(k, v)
+    })
+    const s = q.toString()
+    if (s) url += (url.includes('?') ? '&' : '?') + s
+  }
+
+  const opsi = { method: metode, headers: {}, signal }
+
+  // Jalur pasien memakai token pasien; selainnya token admin.
+  const pasienJalur = jalur.startsWith('/api/pasien')
+  const t = pasienJalur ? tokenPasien.ambil() : token.ambil()
+  if (t) opsi.headers.Authorization = `Bearer ${t}`
+
+  if (formData) {
+    // Content-Type sengaja TIDAK diisi: peramban harus menuliskannya sendiri
+    // lengkap dengan boundary multipart.
+    opsi.body = formData
+  } else if (body !== undefined) {
+    opsi.headers['Content-Type'] = 'application/json'
+    opsi.body = JSON.stringify(body)
+  }
+
+  let res
+  try {
+    res = await fetch(url, opsi)
+  } catch (e) {
+    if (e.name === 'AbortError') throw e
+    throw new GalatApi(
+      'Tidak dapat menghubungi server. Periksa sambungan internet Anda.', 0)
+  }
+
+  if (res.status === 204) return null
+
+  let json = null
+  try {
+    json = await res.json()
+  } catch {
+    if (res.ok) return null
+    throw new GalatApi('Jawaban server tidak dikenali.', res.status)
+  }
+
+  if (!res.ok) {
+    if (res.status === 401) {
+      if (pasienJalur) { if (saatTakSahPasien) saatTakSahPasien() }
+      else if (saatTakSah) saatTakSah()
+    }
+    throw new GalatApi(
+      json?.pesan || 'Terjadi kesalahan.', res.status, json?.galat || {})
+  }
+
+  return { data: json?.data ?? null, meta: json?.meta ?? null }
+}
+
+const api = {
+  get:   (jalur, opsi) => panggil('GET', jalur, opsi),
+  post:  (jalur, body, opsi) => panggil('POST', jalur, { ...opsi, body }),
+  put:   (jalur, body, opsi) => panggil('PUT', jalur, { ...opsi, body }),
+  del:   (jalur, opsi) => panggil('DELETE', jalur, opsi),
+  unggah: (jalur, formData, opsi) => panggil('POST', jalur, { ...opsi, formData }),
+}
+
+export default api
+
+/* =====================================================================
+   Titik akhir publik
+   ===================================================================== */
+export const publik = {
+  pengaturan: (o) => api.get('/api/publik/pengaturan', o),
+  dokter:     (o) => api.get('/api/publik/dokter', o),
+  jadwalReservasi: (o) => api.get('/api/publik/jadwal-reservasi', o), // dokter aktif SIMRS (untuk form reservasi)
+  paket:      (jenis, o) => api.get('/api/publik/paket', { ...o, params: jenis ? { jenis } : undefined }), // paket sinkron SIMRS
+  fasilitas:  (o) => api.get('/api/publik/fasilitas', o),
+  halaman:    (slug, o) => api.get(`/api/publik/halaman/${slug}`, o),
+  kategori:   (tipe, o) => api.get(`/api/publik/kategori/${tipe}`, o),
+  daftar:     (modul, params, o) => api.get(`/api/publik/konten/${modul}`, { ...o, params }),
+  detail:     (modul, slug, o) => api.get(`/api/publik/konten/${modul}/${slug}`, o),
+  cari:       (q, o) => api.get('/api/publik/cari', { ...o, params: { q } }),
+
+  /**
+   * Jejak klik tombol WhatsApp.
+   *
+   * Kegagalannya sengaja ditelan: pengunjung sedang dalam perjalanan menuju
+   * WhatsApp, dan mencatat statistik tidak boleh menghalanginya.
+   */
+  lead: (isi) => api.post('/api/publik/lead', isi).catch(() => {}),
+}
+
+/* =====================================================================
+   Titik akhir CMS
+   ===================================================================== */
+export const admin = {
+  masuk:      (isi) => api.post('/api/admin/masuk', isi),
+  saya:       (o) => api.get('/api/admin/saya', o),
+  gantiSandi: (isi) => api.post('/api/admin/ganti-sandi', isi),
+  dasbor:     (o) => api.get('/api/admin/dasbor', o),
+
+  konten: {
+    daftar: (modul, params, o) => api.get(`/api/admin/konten/${modul}`, { ...o, params }),
+    ambil:  (modul, id, o) => api.get(`/api/admin/konten/${modul}/${id}`, o),
+    buat:   (modul, isi) => api.post(`/api/admin/konten/${modul}`, isi),
+    ubah:   (modul, id, isi) => api.put(`/api/admin/konten/${modul}/${id}`, isi),
+    hapus:  (modul, id) => api.del(`/api/admin/konten/${modul}/${id}`),
+  },
+
+  pengaturan:       (o) => api.get('/api/admin/pengaturan', o),
+  simpanPengaturan: (settings) => api.put('/api/admin/pengaturan', { settings }),
+
+  dokter:       (o) => api.get('/api/admin/dokter', o),
+  simpanDokter: (id, isi) => api.put(`/api/admin/dokter/${id}`, isi),
+  sinkron:      (modul) => api.post('/api/admin/sinkron', { modul }),
+  riwayatSinkron: (o) => api.get('/api/admin/sinkron', o),
+
+  // Paket sinkron SIMRS — untuk isi-otomatis form paket MCU/homecare
+  paketSimrs:       (jenis, o) => api.get('/api/admin/paket-simrs', { ...o, params: jenis ? { jenis } : undefined }),
+  paketSimrsDetail: (id, o) => api.get(`/api/admin/paket-simrs/${id}`, o),
+
+  halaman:       (o) => api.get('/api/admin/halaman', o),
+  halamanAmbil:  (id, o) => api.get(`/api/admin/halaman/${id}`, o),
+  halamanSimpan: (id, isi) => api.put(`/api/admin/halaman/${id}`, isi),
+
+  fasilitas:       (o) => api.get('/api/admin/fasilitas', o),
+  fasilitasBuat:   (isi) => api.post('/api/admin/fasilitas', isi),
+  fasilitasUbah:   (id, isi) => api.put(`/api/admin/fasilitas/${id}`, isi),
+  fasilitasHapus:  (id) => api.del(`/api/admin/fasilitas/${id}`),
+  fasilitasUrutan: (urutan) => api.put('/api/admin/fasilitas/urutan', { urutan }),
+
+  kategori:      (params, o) => api.get('/api/admin/kategori', { ...o, params }),
+  kategoriBuat:  (isi) => api.post('/api/admin/kategori', isi),
+  kategoriUbah:  (id, isi) => api.put(`/api/admin/kategori/${id}`, isi),
+  kategoriHapus: (id) => api.del(`/api/admin/kategori/${id}`),
+
+  media:       (params, o) => api.get('/api/admin/media', { ...o, params }),
+  mediaUnggah: (formData) => api.unggah('/api/admin/media', formData),
+  mediaUbah:   (id, isi) => api.put(`/api/admin/media/${id}`, isi),
+  mediaHapus:  (id) => api.del(`/api/admin/media/${id}`),
+
+  pengguna:      (o) => api.get('/api/admin/pengguna', o),
+  peran:         (o) => api.get('/api/admin/peran', o),
+  penggunaBuat:  (isi) => api.post('/api/admin/pengguna', isi),
+  penggunaUbah:  (id, isi) => api.put(`/api/admin/pengguna/${id}`, isi),
+  penggunaSandi: (id, password) => api.put(`/api/admin/pengguna/${id}/sandi`, { password }),
+  penggunaHapus: (id) => api.del(`/api/admin/pengguna/${id}`),
+
+  // Reservasi pasien (verifikasi di CMS)
+  reservasi:       (params, o) => api.get('/api/admin/reservasi', { ...o, params }),
+  reservasiStatus: (id, isi) => api.put(`/api/admin/reservasi/${id}`, isi),
+
+  // Pesanan paket (jual ke SIMRS di CMS)
+  pesanan:       (params, o) => api.get('/api/admin/pesanan', { ...o, params }),
+  pesananStatus: (id, isi) => api.put(`/api/admin/pesanan/${id}`, isi),
+}
+
+/* =====================================================================
+   Portal pasien (reservasi) — token terpisah (compro.pasien.token)
+   ===================================================================== */
+export const pasien = {
+  daftar:     (isi) => api.post('/api/pasien/daftar', isi),
+  masuk:      (isi) => api.post('/api/pasien/masuk', isi),
+  saya:       (o) => api.get('/api/pasien/saya', o),
+  gantiSandi: (isi) => api.post('/api/pasien/ganti-sandi', isi),
+
+  // Verifikasi pasien lama: cocokkan NIK+tgl lahir ke SIMRS → No. RM (tersinkron ke akun).
+  cariRm:          (isi) => api.post('/api/pasien/cari-rm', isi),
+
+  reservasi:       (o) => api.get('/api/pasien/reservasi', o),
+  reservasiBuat:   (isi) => api.post('/api/pasien/reservasi', isi),
+  reservasiBatal:  (id) => api.post(`/api/pasien/reservasi/${id}/batal`),
+  reservasiCheckin: (id) => api.post(`/api/pasien/reservasi/${id}/checkin`),
+
+  // Pesanan paket (MCU & layanan)
+  pesanan:       (o) => api.get('/api/pasien/pesanan', o),
+  pesananBuat:   (isi) => api.post('/api/pasien/pesanan', isi),
+  pesananBatal:  (id) => api.post(`/api/pasien/pesanan/${id}/batal`),
+}

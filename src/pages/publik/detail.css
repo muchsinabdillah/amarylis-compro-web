@@ -1,0 +1,75 @@
+.detail__kisi { display: grid; gap: var(--s-6); align-items: start; }
+
+@media (min-width: 980px) {
+  .detail__kisi { grid-template-columns: minmax(0, 1fr) 340px; gap: var(--s-8); }
+}
+
+/* Kotak harga menempel saat digulir: keputusan memesan diambil sambil
+   membaca, bukan setelah sampai di ujung halaman. */
+.detail__samping { position: sticky; top: calc(var(--tinggi-navbar) + var(--s-4)); }
+
+.detail__kotak {
+  background: var(--hijau-50);
+  border: 1px solid var(--hijau-100);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.detail__harga {
+  font-size: var(--t-2xl);
+  font-weight: 800;
+  color: var(--hijau-800);
+  line-height: 1.2;
+}
+
+.detail__baris {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-3);
+  font-size: var(--t-sm);
+  padding-block: var(--s-2);
+  border-top: 1px dashed var(--hijau-300);
+}
+.detail__baris span { color: var(--teks-lembut); }
+
+.detail__catatan {
+  font-size: var(--t-xs);
+  color: var(--teks-samar);
+  margin: 0;
+}
+
+.detail__persiapan {
+  margin-top: var(--s-7);
+  padding: var(--s-5);
+  background: var(--awas-bg);
+  border-left: 4px solid var(--awas);
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+}
+.detail__persiapan h2 { font-size: var(--t-lg); color: var(--awas); margin-bottom: var(--s-3); }
+
+.detail__manfaat {
+  list-style: none;
+  margin: var(--s-4) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--s-2);
+}
+.detail__manfaat li {
+  position: relative;
+  padding: var(--s-3) var(--s-4) var(--s-3) var(--s-6);
+  background: var(--latar-lembut);
+  border-radius: var(--r-md);
+  font-size: var(--t-sm);
+}
+.detail__manfaat li::before {
+  content: '✓';
+  position: absolute;
+  left: var(--s-3);
+  top: var(--s-3);
+  color: var(--hijau-600);
+  font-weight: 800;
+}
+.detail__manfaat li div { color: var(--teks-lembut); margin-top: 2px; }

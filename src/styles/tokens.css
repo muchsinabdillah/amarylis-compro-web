@@ -1,0 +1,111 @@
+/*
+ * Token desain — satu-satunya tempat warna, jarak, dan ukuran huruf
+ * ditentukan.
+ *
+ * Komponen tidak pernah menuliskan nilai heksadesimal sendiri. Warna yang
+ * ditulis langsung di satu komponen adalah warna yang tidak ikut berubah saat
+ * identitas visualnya disesuaikan — dan yang tertinggal itu selalu baru
+ * ketahuan setelah tayang.
+ *
+ * Palet: hijau, putih, hitam, abu — sesuai identitas klinik. Abunya sengaja
+ * dicondongkan sedikit ke hijau supaya duduk berdampingan dengan warna utama,
+ * bukan terlihat seperti abu bawaan yang tidak dipilih.
+ */
+
+:root {
+  /* -- Warna utama */
+  --hijau-950: #08221C;
+  --hijau-900: #0E3B31;
+  --hijau-800: #12503F;
+  --hijau-700: #17654F;   /* warna utama */
+  --hijau-600: #1F7D63;
+  --hijau-500: #2E9B78;
+  --hijau-300: #7CC5AC;
+  --hijau-100: #DCEFE7;
+  --hijau-50:  #F0F8F5;
+
+  /* -- Netral, sedikit condong hijau */
+  --hitam:     #10120F;
+  --abu-900:   #1C211F;
+  --abu-700:   #3D4442;
+  --abu-600:   #59605D;
+  --abu-500:   #7A817E;
+  --abu-400:   #A4AAA7;
+  --abu-300:   #C9CECB;
+  --abu-200:   #E2E6E4;
+  --abu-100:   #F0F2F1;
+  --putih:     #FFFFFF;
+
+  /* -- Warna makna. Terpisah dari warna utama supaya "berhasil" tidak
+        tertukar dengan "ini tombol utama". */
+  --sukses:    #1F7D63;
+  --sukses-bg: #E5F4EE;
+  --awas:      #9A6212;
+  --awas-bg:   #FBF1DE;
+  --bahaya:    #A32B26;
+  --bahaya-bg: #FBE9E8;
+  --info:      #1B5E8A;
+  --info-bg:   #E6F1F8;
+
+  /* -- Peran permukaan */
+  --latar:        var(--putih);
+  --latar-lembut: var(--hijau-50);
+  --latar-kartu:  var(--putih);
+  --garis:        var(--abu-200);
+  --garis-tegas:  var(--abu-300);
+  --teks:         var(--abu-900);
+  --teks-lembut:  var(--abu-600);
+  --teks-samar:   var(--abu-500);
+  --teks-balik:   var(--putih);
+
+  /* -- Huruf */
+  --font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+          Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  --t-xs:   0.75rem;    /* 12 */
+  --t-sm:   0.875rem;   /* 14 */
+  --t-base: 1rem;       /* 16 */
+  --t-lg:   1.125rem;   /* 18 */
+  --t-xl:   1.375rem;   /* 22 */
+  --t-2xl:  1.75rem;    /* 28 */
+  --t-3xl:  2.25rem;    /* 36 */
+  --t-4xl:  3rem;       /* 48 */
+
+  /* -- Jarak, kelipatan 4 */
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-5: 1.5rem;
+  --s-6: 2rem;
+  --s-7: 3rem;
+  --s-8: 4rem;
+  --s-9: 6rem;
+
+  /* -- Sudut & bayangan */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 16px;
+  --r-xl: 24px;
+  --r-bulat: 999px;
+
+  --bayang-1: 0 1px 2px rgba(16, 18, 15, 0.06), 0 1px 3px rgba(16, 18, 15, 0.04);
+  --bayang-2: 0 4px 12px rgba(16, 18, 15, 0.07), 0 2px 4px rgba(16, 18, 15, 0.04);
+  --bayang-3: 0 12px 32px rgba(16, 18, 15, 0.10), 0 4px 8px rgba(16, 18, 15, 0.05);
+
+  /* -- Tata letak */
+  --lebar-isi: 1160px;
+  --lebar-baca: 68ch;
+  --tinggi-navbar: 72px;
+
+  --gerak: 180ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/*
+ * Halaman publik sengaja tetap terang.
+ *
+ * Situs klinik dibuka sebentar untuk mencari jadwal dan nomor telepon; dua
+ * tampilan berarti dua tampilan yang harus diperiksa setiap kali ada halaman
+ * baru, dan yang kedua hampir tidak pernah diperiksa. Bila mode gelap kelak
+ * diinginkan, tempatnya di sini — bukan tersebar di komponen.
+ */

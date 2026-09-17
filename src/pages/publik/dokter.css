@@ -1,0 +1,30 @@
+.dokter__bio {
+  font-size: var(--t-sm);
+  color: var(--teks-lembut);
+}
+.dokter__bio p { margin-bottom: var(--s-2); }
+
+.dokter__jadwal {
+  margin-top: var(--s-3);
+  padding-top: var(--s-3);
+  border-top: 1px dashed var(--garis-tegas);
+}
+.dokter__jadwal h3 {
+  font-size: var(--t-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--teks-samar);
+  margin-bottom: var(--s-2);
+}
+.dokter__jadwal dl { margin: 0; display: grid; gap: var(--s-2); }
+
+.dokter__hari {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: var(--s-3);
+  font-size: var(--t-sm);
+  align-items: start;
+}
+.dokter__hari dt { font-weight: 700; color: var(--hijau-800); }
+.dokter__hari dd { margin: 0; font-variant-numeric: tabular-nums; }
+.dokter__unit { color: var(--teks-samar); font-size: var(--t-xs); }

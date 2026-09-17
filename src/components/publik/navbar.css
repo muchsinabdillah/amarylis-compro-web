@@ -1,0 +1,197 @@
+/* Navbar tetap menempel di atas: jadwal dan tombol hubungi harus selalu
+   terjangkau, bukan hanya di puncak halaman. */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--gerak), box-shadow var(--gerak);
+}
+.nav--turun {
+  border-bottom-color: var(--garis);
+  box-shadow: var(--bayang-1);
+}
+
+.nav__baris {
+  height: var(--tinggi-navbar);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+}
+
+/* ------------------------------------------------------------- merek */
+.nav__merek {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  color: var(--hijau-950);
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.nav__merek:hover { text-decoration: none; }
+.nav__logo { height: 40px; width: auto; }
+
+.nav__lambang {
+  width: 38px; height: 38px;
+  display: grid; place-items: center;
+  background: var(--hijau-700);
+  color: var(--putih);
+  border-radius: var(--r-md);
+  font-size: 1.5rem; font-weight: 700; line-height: 1;
+}
+
+.nav__nama {
+  font-size: var(--t-sm);
+  line-height: 1.2;
+  max-width: 15ch;
+  letter-spacing: -0.01em;
+}
+
+/* -------------------------------------------------------------- menu */
+.nav__menu { display: none; align-items: center; gap: var(--s-1); }
+
+.nav__tautan {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0.5rem 0.7rem;
+  border: 0;
+  background: transparent;
+  border-radius: var(--r-sm);
+  color: var(--abu-700);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color var(--gerak), background var(--gerak);
+}
+.nav__tautan:hover { color: var(--hijau-700); background: var(--hijau-50); text-decoration: none; }
+.nav__tautan--aktif { color: var(--hijau-700); }
+
+.nav__panah { font-size: 0.7em; opacity: 0.7; }
+
+.nav__punya-anak { position: relative; }
+.nav__anak {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 230px;
+  background: var(--putih);
+  border: 1px solid var(--garis);
+  border-radius: var(--r-md);
+  box-shadow: var(--bayang-3);
+  padding: var(--s-2);
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+}
+/* Dibuka lewat hover MAUPUN fokus keyboard — submenu yang hanya menanggapi
+   hover tidak dapat dijangkau dengan Tab. */
+.nav__punya-anak:hover .nav__anak,
+.nav__punya-anak:focus-within .nav__anak { display: flex; }
+
+.nav__anak-tautan {
+  padding: 0.55rem 0.7rem;
+  border-radius: var(--r-sm);
+  font-size: var(--t-sm);
+  font-weight: 500;
+  color: var(--abu-700);
+}
+.nav__anak-tautan:hover { background: var(--hijau-50); color: var(--hijau-800); text-decoration: none; }
+
+/* -------------------------------------------------------------- aksi */
+.nav__aksi { display: flex; align-items: center; gap: var(--s-2); }
+
+.nav__ikon {
+  width: 40px; height: 40px;
+  display: grid; place-items: center;
+  border: 1px solid var(--garis);
+  border-radius: var(--r-md);
+  background: var(--putih);
+  cursor: pointer;
+  font-size: 1rem;
+}
+.nav__ikon:hover { background: var(--hijau-50); border-color: var(--hijau-300); }
+
+.nav__cta { display: none; white-space: nowrap; }
+
+.nav__hamburger {
+  width: 40px; height: 40px;
+  display: grid; place-items: center;
+  border: 1px solid var(--garis);
+  border-radius: var(--r-md);
+  background: var(--putih);
+  cursor: pointer;
+}
+
+.nav__garis, .nav__garis::before, .nav__garis::after {
+  display: block;
+  width: 18px; height: 2px;
+  background: var(--abu-900);
+  border-radius: 2px;
+  transition: transform var(--gerak), opacity var(--gerak);
+}
+.nav__garis { position: relative; }
+.nav__garis::before, .nav__garis::after { content: ''; position: absolute; left: 0; }
+.nav__garis::before { top: -6px; }
+.nav__garis::after { top: 6px; }
+
+.nav__garis--x { background: transparent; }
+.nav__garis--x::before { top: 0; transform: rotate(45deg); }
+.nav__garis--x::after { top: 0; transform: rotate(-45deg); }
+
+/* ------------------------------------------------------------- cari */
+.nav__cari {
+  border-top: 1px solid var(--garis);
+  background: var(--hijau-50);
+  padding-block: var(--s-3);
+}
+.nav__cari form { display: flex; gap: var(--s-2); }
+.nav__cari input {
+  flex: 1;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--garis-tegas);
+  border-radius: var(--r-md);
+  background: var(--putih);
+  font-size: var(--t-sm);
+}
+
+/* -------------------------------------------------------- laci ponsel */
+.nav__laci {
+  position: fixed;
+  inset: var(--tinggi-navbar) 0 0;
+  background: var(--putih);
+  overflow-y: auto;
+  padding: var(--s-4) 0 var(--s-8);
+  border-top: 1px solid var(--garis);
+}
+.nav__laci nav { display: flex; flex-direction: column; padding-inline: var(--s-4); }
+
+.nav__laci-tautan {
+  padding: var(--s-4) var(--s-2);
+  border-bottom: 1px solid var(--garis);
+  font-weight: 600;
+  color: var(--abu-900);
+}
+.nav__laci-tautan:hover { color: var(--hijau-700); text-decoration: none; }
+
+.nav__laci-grup { display: flex; flex-direction: column; }
+.nav__laci-judul {
+  padding: var(--s-5) var(--s-2) var(--s-2);
+  font-size: var(--t-xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--teks-samar);
+}
+
+/* ------------------------------------------------------------ layar besar */
+@media (min-width: 1080px) {
+  .nav__menu { display: flex; }
+  .nav__hamburger { display: none; }
+  .nav__cta { display: inline-flex; }
+  .nav__nama { font-size: var(--t-base); max-width: none; }
+}
