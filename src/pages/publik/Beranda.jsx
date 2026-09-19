@@ -98,9 +98,9 @@ export default function Beranda() {
           ikon="M3 11l9-8 9 8M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10"
         />
         <AksiCepat
-          ke="/pasien"
+          ke="/dokter"
           judul="Temu Janji"
-          teks="Reservasi poliklinik online, tanpa antre"
+          teks="Pilih dokter & jadwalnya, lalu reservasi"
           ikon="M8 2v3M16 2v3M4 8h16M6 4h12a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM9 14l2 2 4-4"
           utama
         />

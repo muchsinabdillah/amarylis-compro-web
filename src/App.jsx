@@ -3,6 +3,7 @@ import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
 
 import { SitePenyedia } from './context/SiteContext'
 import { AuthPenyedia } from './context/AuthContext'
+import { PasienPenyedia } from './context/PasienAuthContext'
 
 import Navbar from './components/publik/Navbar'
 import Footer from './components/publik/Footer'
@@ -33,6 +34,10 @@ const Admin = lazy(() => import('./pages/admin/Admin'))
  * membaca halaman publik tak perlu ikut mengunduhnya. */
 const Pasien = lazy(() => import('./pages/pasien/Pasien'))
 
+/* Portal MCU perusahaan — dimuat terpisah pula, dan penyedia sesinya dipasang
+ * di dalam halamannya sendiri supaya halaman publik tidak ikut memeriksanya. */
+const Perusahaan = lazy(() => import('./pages/perusahaan/Perusahaan'))
+
 /** Kerangka halaman publik: navbar, isi, footer, tombol mengambang. */
 function TataLetakPublik() {
   return (
@@ -52,6 +57,7 @@ export default function App() {
   return (
     <SitePenyedia>
       <AuthPenyedia>
+       <PasienPenyedia>
         <GulirKeAtas />
 
         <Routes>
@@ -188,6 +194,16 @@ export default function App() {
             }
           />
 
+          {/* ------------------------------------------ Portal MCU perusahaan */}
+          <Route
+            path="/perusahaan/*"
+            element={
+              <Suspense fallback={<div style={{ padding: 40 }}><Memuat tinggi={200} /></div>}>
+                <Perusahaan />
+              </Suspense>
+            }
+          />
+
           {/* -------------------------------------------------------- CMS */}
           <Route
             path="/admin/*"
@@ -198,6 +214,7 @@ export default function App() {
             }
           />
         </Routes>
+       </PasienPenyedia>
       </AuthPenyedia>
     </SitePenyedia>
   )

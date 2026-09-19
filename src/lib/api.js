@@ -11,9 +11,10 @@ const DASAR = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '')
 
 const KUNCI_TOKEN = 'compro.token'
 const KUNCI_TOKEN_PASIEN = 'compro.pasien.token'
+const KUNCI_TOKEN_PERUSAHAAN = 'compro.perusahaan.token'
 
-/* Penyimpanan token generik agar admin & pasien tak berbagi satu slot: admin
-   dan pasien bisa masuk berbarengan di peramban yang sama tanpa saling
+/* Penyimpanan token generik agar admin, pasien, & perusahaan tak berbagi satu
+   slot: ketiganya bisa masuk berbarengan di peramban yang sama tanpa saling
    mengeluarkan. Token dipilih per-jalur di panggil(). */
 function bikinToken(kunci) {
   return {
@@ -26,6 +27,7 @@ function bikinToken(kunci) {
 /* -------------------------------------------------------------- token */
 export const token = bikinToken(KUNCI_TOKEN)          // admin CMS
 export const tokenPasien = bikinToken(KUNCI_TOKEN_PASIEN) // portal pasien
+export const tokenPerusahaan = bikinToken(KUNCI_TOKEN_PERUSAHAAN) // portal MCU perusahaan
 
 /* -------------------------------------------------------------- galat */
 export class GalatApi extends Error {
@@ -43,12 +45,23 @@ export class GalatApi extends Error {
 }
 
 /* Dipasang AuthContext supaya token kedaluwarsa langsung mengeluarkan
-   pengguna, di mana pun permintaannya terjadi. Terpisah admin vs pasien agar
-   401 di satu area tidak mengeluarkan yang lain. */
+   pengguna, di mana pun permintaannya terjadi. Terpisah per area agar 401 di
+   satu area tidak mengeluarkan yang lain. */
 let saatTakSah = null
 let saatTakSahPasien = null
+let saatTakSahPerusahaan = null
 export function pasangPenanganTakSah(fn) { saatTakSah = fn }
 export function pasangPenanganTakSahPasien(fn) { saatTakSahPasien = fn }
+export function pasangPenanganTakSahPerusahaan(fn) { saatTakSahPerusahaan = fn }
+
+/* Satu jalur = satu area sesi. Dipakai dua kali di panggil(): memilih token
+   yang dikirim, dan memilih siapa yang dikeluarkan saat 401. Keduanya harus
+   memakai jawaban yang sama, jadi penentuannya ditulis sekali di sini. */
+function areaJalur(jalur) {
+  if (jalur.startsWith('/api/pasien')) return 'pasien'
+  if (jalur.startsWith('/api/perusahaan')) return 'perusahaan'
+  return 'admin'
+}
 
 /* ------------------------------------------------------------ inti */
 async function panggil(metode, jalur, { body, params, signal, formData } = {}) {
@@ -64,9 +77,9 @@ async function panggil(metode, jalur, { body, params, signal, formData } = {}) {
 
   const opsi = { method: metode, headers: {}, signal }
 
-  // Jalur pasien memakai token pasien; selainnya token admin.
-  const pasienJalur = jalur.startsWith('/api/pasien')
-  const t = pasienJalur ? tokenPasien.ambil() : token.ambil()
+  const area = areaJalur(jalur)
+  const slot = area === 'pasien' ? tokenPasien : area === 'perusahaan' ? tokenPerusahaan : token
+  const t = slot.ambil()
   if (t) opsi.headers.Authorization = `Bearer ${t}`
 
   if (formData) {
@@ -99,8 +112,9 @@ async function panggil(metode, jalur, { body, params, signal, formData } = {}) {
 
   if (!res.ok) {
     if (res.status === 401) {
-      if (pasienJalur) { if (saatTakSahPasien) saatTakSahPasien() }
-      else if (saatTakSah) saatTakSah()
+      const keluar = area === 'pasien' ? saatTakSahPasien
+        : area === 'perusahaan' ? saatTakSahPerusahaan : saatTakSah
+      if (keluar) keluar()
     }
     throw new GalatApi(
       json?.pesan || 'Terjadi kesalahan.', res.status, json?.galat || {})
@@ -229,4 +243,27 @@ export const pasien = {
   pesanan:       (o) => api.get('/api/pasien/pesanan', o),
   pesananBuat:   (isi) => api.post('/api/pasien/pesanan', isi),
   pesananBatal:  (id) => api.post(`/api/pasien/pesanan/${id}/batal`),
+}
+
+/* =====================================================================
+   Portal MCU perusahaan — token terpisah (compro.perusahaan.token)
+
+   Kredensialnya dikelola petugas di SIMRS, bukan di sini; website hanya
+   meneruskan email+sandi lalu memegang sesinya sendiri.
+   ===================================================================== */
+export const perusahaan = {
+  masuk: (isi) => api.post('/api/perusahaan/masuk', isi),
+  saya:  (o) => api.get('/api/perusahaan/saya', o),
+
+  // Unggahan peserta MCU
+  mcuPaket:  (o) => api.get('/api/perusahaan/mcu/paket', o),
+  mcuBatch:  (o) => api.get('/api/perusahaan/mcu/batch', o),
+  mcuUnggah: (isi) => api.post('/api/perusahaan/mcu/batch', isi),
+  mcuDetail: (no, o) => api.get(`/api/perusahaan/mcu/batch/${encodeURIComponent(no)}`, o),
+  mcuBatal:  (no, alasan) => api.post(`/api/perusahaan/mcu/batch/${encodeURIComponent(no)}/batal`, { alasan }),
+
+  // Hasil & dasbor
+  mcuRingkas:     (o) => api.get('/api/perusahaan/mcu/ringkas', o),
+  mcuHasil:       (o) => api.get('/api/perusahaan/mcu/hasil', o),
+  mcuHasilDetail: (id, o) => api.get(`/api/perusahaan/mcu/hasil/${id}`, o),
 }

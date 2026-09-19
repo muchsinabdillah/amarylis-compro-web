@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
-import { PasienPenyedia, usePasien } from '../../context/PasienAuthContext'
+import { usePasien } from '../../context/PasienAuthContext'
 import { Memuat } from '../../components/ui/Dasar'
 import Kerangka from './Kerangka'
 import Masuk from './Masuk'
@@ -61,10 +61,8 @@ function SimpanLaluMasuk() {
   return <Navigate to="/pasien/masuk" replace />
 }
 
+/* Penyedia sesi pasien kini dipasang di App (dibagi dengan halaman publik),
+   sehingga tombol "Reservasi" di halaman dokter bisa membuka modal masuk. */
 export default function Pasien() {
-  return (
-    <PasienPenyedia>
-      <Isi />
-    </PasienPenyedia>
-  )
+  return <Isi />
 }

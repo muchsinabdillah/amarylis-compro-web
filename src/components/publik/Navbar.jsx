@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useSitus } from '../../context/SiteContext'
+import { usePasien } from '../../context/PasienAuthContext'
+import ModalAuth from './ModalAuth'
 import { tautanTelepon } from '../../lib/format'
 import './navbar.css'
 
@@ -20,6 +22,8 @@ const MENU = [
 
 export default function Navbar() {
   const { klinik, merek, tautanWa } = useSitus()
+  const { profil } = usePasien()
+  const [bukaAuth, setBukaAuth] = useState(false)
   const [buka, setBuka] = useState(false)
   const [turun, setTurun] = useState(false)
   const [cari, setCari] = useState('')
@@ -112,8 +116,14 @@ export default function Navbar() {
             🔍
           </button>
 
-          {/* Tindakan utama: masuk / daftar akun pasien → portal pasien. */}
-          <Link to="/pasien" className="btn nav__cta">Login Akun</Link>
+          {/* Sudah masuk → pintasan ke portal. Belum → modal masuk/daftar di tempat. */}
+          {profil ? (
+            <Link to="/pasien" className="btn nav__cta">Akun Saya</Link>
+          ) : (
+            <button type="button" className="btn nav__cta" onClick={() => setBukaAuth(true)}>
+              Login Akun
+            </button>
+          )}
 
           {/* Tombol sekunder menyesuaikan apa yang benar-benar tersedia:
               WhatsApp bila nomornya sudah diisi, selain itu telepon. */}
@@ -171,6 +181,13 @@ export default function Navbar() {
           </nav>
         </div>
       )}
+      <ModalAuth
+        terbuka={bukaAuth}
+        saatTutup={() => setBukaAuth(false)}
+        judul="Masuk / Daftar Akun Pasien"
+        keterangan="Untuk reservasi poliklinik, paket MCU, dan riwayat kunjungan."
+        saatSukses={() => { setBukaAuth(false); navigasi('/pasien') }}
+      />
     </header>
   )
 }
