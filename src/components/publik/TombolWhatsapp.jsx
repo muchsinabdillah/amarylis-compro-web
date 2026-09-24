@@ -37,7 +37,13 @@ export default function TombolWhatsapp() {
   const gaya = {
     position: 'fixed',
     right: 'var(--s-4)',
-    bottom: 'var(--s-4)',
+    /*
+     * Di layar sempit ada bilah navigasi bawah setinggi 56px; tanpa
+     * pengangkatan ini tombolnya duduk persis di atas tombol Profil dan
+     * keduanya saling merebut sentuhan. Di layar lebar bilah itu tidak ada,
+     * jadi jaraknya kembali seperti semula.
+     */
+    bottom: 'calc(var(--s-4) + var(--tinggi-navbawah, 0px) + env(safe-area-inset-bottom, 0px))',
     zIndex: 90,
     display: 'inline-flex',
     alignItems: 'center',

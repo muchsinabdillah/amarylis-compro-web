@@ -7,6 +7,7 @@ import { PasienPenyedia } from './context/PasienAuthContext'
 
 import Navbar from './components/publik/Navbar'
 import Footer from './components/publik/Footer'
+import NavBawah from './components/publik/NavBawah'
 import TombolWhatsapp from './components/publik/TombolWhatsapp'
 import GulirKeAtas from './components/publik/GulirKeAtas'
 import { Memuat } from './components/ui/Dasar'
@@ -49,6 +50,7 @@ function TataLetakPublik() {
       </main>
       <Footer />
       <TombolWhatsapp />
+      <NavBawah />
     </>
   )
 }

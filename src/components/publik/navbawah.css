@@ -1,0 +1,123 @@
+/*
+ * Bilah navigasi bawah — hanya pada layar sempit.
+ *
+ * Batasnya 1080px, sama dengan batas hamburger: di atas itu menu lengkap sudah
+ * ada di kepala halaman, dan bilah bawah justru menutupi isi tanpa menambah
+ * apa pun.
+ */
+.navbawah { display: none; }
+
+/* Dibaca TombolWhatsapp agar ia naik di atas bilah, dan oleh body untuk
+   menyisakan ruang di kaki halaman. Satu angka, satu tempat. */
+:root { --tinggi-navbawah: 0px; }
+
+@media (max-width: 1079.98px) {
+  :root { --tinggi-navbawah: 56px; }
+
+  .navbawah {
+    display: block;
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 60;
+    background: var(--putih);
+    border-top: 1px solid var(--garis);
+    /* Ruang aman iPhone: tanpa ini baris tombolnya tertimpa garis gestur. */
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    box-shadow: 0 -2px 16px rgba(15, 42, 27, 0.08);
+  }
+
+  .navbawah__baris {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    align-items: stretch;
+  }
+
+  .navbawah__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    /* 56px: batas bawah sasaran sentuh yang nyaman, bukan angka hias. */
+    min-height: var(--tinggi-navbawah);
+    padding: 7px 4px 8px;
+    border: 0;
+    background: transparent;
+    color: var(--abu-600, #5b6b62);
+    font: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.18s ease;
+  }
+  .navbawah__item:hover { text-decoration: none; }
+  .navbawah__item svg { width: 22px; height: 22px; }
+
+  .navbawah__item.aktif { color: var(--hijau-700); }
+  /* Penanda halaman aktif berupa garis di atas tombolnya — bukan latar penuh,
+     yang pada bilah sesempit ini terbaca seperti tombol tertekan. */
+  .navbawah__item.aktif::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 28px; height: 3px;
+    border-radius: 0 0 3px 3px;
+    background: var(--hijau-700);
+  }
+  .navbawah__item { position: relative; }
+
+  /* ------------------------------------------------------------- lembar paket */
+  .navbawah__tirai {
+    position: fixed; inset: 0; z-index: 59;
+    background: rgba(15, 42, 27, 0.35);
+    animation: navbawahTirai 0.18s ease both;
+  }
+  @keyframes navbawahTirai { from { opacity: 0 } to { opacity: 1 } }
+
+  .navbawah__lembar {
+    border-bottom: 1px solid var(--garis);
+    padding: var(--s-3);
+    display: grid;
+    gap: 6px;
+    animation: navbawahNaik 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes navbawahNaik {
+    from { opacity: 0; transform: translateY(12px) }
+    to   { opacity: 1; transform: none }
+  }
+
+  .navbawah__lembar-judul {
+    font-size: 11px; font-weight: 800; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--hijau-700);
+    padding: 2px 4px 4px;
+  }
+  .navbawah__lembar-item {
+    display: grid; gap: 2px;
+    padding: 9px 11px;
+    border: 1px solid var(--garis);
+    border-radius: var(--r-md);
+    background: var(--putih);
+    color: var(--hijau-950);
+    text-decoration: none;
+  }
+  .navbawah__lembar-item:hover { text-decoration: none; }
+  .navbawah__lembar-item.active {
+    border-color: var(--hijau-700);
+    background: var(--hijau-50);
+  }
+  .navbawah__lembar-nama { font-size: 13.5px; font-weight: 700; }
+  .navbawah__lembar-teks { font-size: 11.5px; color: var(--abu-600, #5b6b62); }
+
+  /*
+   * Ruang di kaki halaman supaya isi terakhir tidak tertutup bilah.
+   * Diberikan ke body, bukan ke main, karena footer pun harus ikut naik.
+   */
+  body { padding-bottom: calc(var(--tinggi-navbawah) + env(safe-area-inset-bottom, 0px)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navbawah__lembar, .navbawah__tirai { animation: none; }
+}

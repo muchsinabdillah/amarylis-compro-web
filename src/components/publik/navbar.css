@@ -116,7 +116,18 @@
 }
 .nav__ikon:hover { background: var(--hijau-50); border-color: var(--hijau-300); }
 
-.nav__cta { display: none; white-space: nowrap; }
+/*
+ * Tombol Login dan WhatsApp hanya muat di layar lebar.
+ *
+ * Penyembunyiannya harus lebih kuat daripada `.btn { display: inline-flex }`
+ * di global.css. Keduanya sama-sama satu kelas, jadi yang menang hanyalah yang
+ * ditulis belakangan — dan urutan berkas CSS ditentukan urutan impor, hal yang
+ * mudah berubah tanpa disengaja. Ketika `.btn` yang menang, kedua tombol ini
+ * tetap tampil di ponsel, membuat .nav__aksi selebar 369px pada layar 360px:
+ * seluruh halaman bisa digulir ke samping dan muncul celah putih di kanan.
+ * Memakai dua kelas membuatnya tidak bergantung pada urutan.
+ */
+.nav__aksi .nav__cta { display: none; white-space: nowrap; }
 
 .nav__hamburger {
   width: 40px; height: 40px;
@@ -192,6 +203,20 @@
 @media (min-width: 1080px) {
   .nav__menu { display: flex; }
   .nav__hamburger { display: none; }
-  .nav__cta { display: inline-flex; }
+  .nav__aksi .nav__cta { display: inline-flex; }
   .nav__nama { font-size: var(--t-base); max-width: none; }
 }
+
+/* ------------------------------------------------- aksi di dalam laci ponsel
+ * Tombol Login dan WhatsApp disembunyikan dari kepala halaman pada layar
+ * sempit, jadi keduanya harus muncul kembali di sini — kalau tidak, pengunjung
+ * ponsel kehilangan dua pintu masuk utamanya.
+ */
+.nav__laci-aksi {
+  display: grid;
+  gap: var(--s-2);
+  margin-top: var(--s-3);
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--garis);
+}
+.nav__laci-aksi .btn { width: 100%; justify-content: center; }

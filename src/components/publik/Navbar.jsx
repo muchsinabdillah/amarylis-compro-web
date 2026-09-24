@@ -179,6 +179,25 @@ export default function Navbar() {
               </NavLink>
             )))}
           </nav>
+
+          {/* Tombol yang disembunyikan dari kepala halaman pada layar sempit. */}
+          <div className="nav__laci-aksi">
+            {profil ? (
+              <Link to="/pasien" className="btn" onClick={() => setBuka(false)}>Akun Saya</Link>
+            ) : (
+              <button type="button" className="btn"
+                onClick={() => { setBuka(false); setBukaAuth(true) }}>
+                Login Akun
+              </button>
+            )}
+            {wa ? (
+              <a className="btn btn--wa" href={wa} target="_blank" rel="noopener noreferrer">
+                Chat WhatsApp
+              </a>
+            ) : tel ? (
+              <a className="btn" href={tel}>Telepon {klinik.telepon}</a>
+            ) : null}
+          </div>
         </div>
       )}
       <ModalAuth
