@@ -89,8 +89,12 @@ export default function NavBawah() {
             <Ikon d={IKON.beranda} /><span>Home</span>
           </NavLink>
 
+          {/* Dua keadaan yang berbeda dan tidak boleh disamakan: `aktif` berarti
+              halaman yang sedang dibuka, `terbuka` hanya berarti lembarnya
+              sedang tampil. Menandai keduanya sama membuat dua tab menyala
+              sekaligus, dan pembacanya kehilangan petunjuk sedang di mana. */}
           <button type="button"
-            className={`navbawah__item ${paketAktif || bukaPaket ? 'aktif' : ''}`}
+            className={`navbawah__item ${paketAktif ? 'aktif' : ''} ${bukaPaket ? 'terbuka' : ''}`}
             aria-haspopup="menu" aria-expanded={bukaPaket}
             onClick={() => setBukaPaket((v) => !v)}>
             <Ikon d={IKON.paket} /><span>Paket</span>

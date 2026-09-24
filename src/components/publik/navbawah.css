@@ -57,6 +57,9 @@
   .navbawah__item svg { width: 22px; height: 22px; }
 
   .navbawah__item.aktif { color: var(--hijau-700); }
+  /* Lembar yang terbuka diberi warna saja, tanpa garis penanda halaman —
+     halamannya tetap yang sedang dibuka di belakangnya. */
+  .navbawah__item.terbuka { color: var(--hijau-700); }
   /* Penanda halaman aktif berupa garis di atas tombolnya — bukan latar penuh,
      yang pada bilah sesempit ini terbaca seperti tombol tertekan. */
   .navbawah__item.aktif::before {
