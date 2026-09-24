@@ -73,18 +73,22 @@ export default function Beranda() {
             )}
           </div>
 
-          <div className="hero__gambar masuk-atas" style={{ animationDelay: '0.15s' }}>
+          {/* Gambar hero klinik ini adalah LOGO, bukan foto: tulisan melingkar
+              "Your Health Is Our Priority" terpotong begitu dipaksa memenuhi
+              bingkai. Karena itu dimuat penuh, bukan ditutup. */}
+          <div className="hero__gambar">
             <Gambar
               src={beranda.hero_image}
-              alt=""
-              keterangan="Foto klinik belum diunggah"
+              alt={`Logo ${klinik.nama}`}
+              muat="penuh"
+              keterangan="Logo atau foto klinik belum diunggah"
             />
           </div>
         </div>
       </section>
 
       {/* ------------------------------------------- aksi cepat (di bawah banner) */}
-      <section className="wadah aksi-cepat">
+      <Reveal sebagai="section" className="wadah aksi-cepat">
         <AksiCepat
           ke="/mcu"
           judul="Medical Check Up"
@@ -104,18 +108,20 @@ export default function Beranda() {
           ikon="M8 2v3M16 2v3M4 8h16M6 4h12a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM9 14l2 2 4-4"
           utama
         />
-      </section>
+      </Reveal>
 
       {/* ------------------------------------------------------- layanan */}
       <section className="seksi">
         <div className="wadah">
-          <div className="baris baris--antara judul-seksi" style={{ maxWidth: 'none' }}>
-            <div>
-              <span className="eyebrow">Layanan</span>
-              <h2>Yang bisa kami bantu</h2>
+          <Reveal>
+            <div className="baris baris--antara judul-seksi" style={{ maxWidth: 'none' }}>
+              <div>
+                <span className="eyebrow">Layanan</span>
+                <h2>Yang bisa kami bantu</h2>
+              </div>
+              <Link to="/layanan" className="btn btn--garis btn--kecil">Semua layanan</Link>
             </div>
-            <Link to="/layanan" className="btn btn--garis btn--kecil">Semua layanan</Link>
-          </div>
+          </Reveal>
 
           {layanan.memuat ? <KartuRangka jumlah={3} />
             : layanan.data?.length ? (
@@ -134,13 +140,15 @@ export default function Beranda() {
       {/* ----------------------------------------------------------- Paket & MCU */}
       <section className="seksi seksi--lembut">
         <div className="wadah">
-          <div className="baris baris--antara judul-seksi" style={{ maxWidth: 'none' }}>
-            <div>
-              <span className="eyebrow">Medical Check Up</span>
-              <h2>Paket pemeriksaan berkala</h2>
+          <Reveal>
+            <div className="baris baris--antara judul-seksi" style={{ maxWidth: 'none' }}>
+              <div>
+                <span className="eyebrow">Medical Check Up</span>
+                <h2>Paket pemeriksaan berkala</h2>
+              </div>
+              <Link to="/mcu" className="btn btn--garis btn--kecil">Semua paket</Link>
             </div>
-            <Link to="/mcu" className="btn btn--garis btn--kecil">Semua paket</Link>
-          </div>
+          </Reveal>
 
           {mcu.memuat ? <KartuRangka jumlah={3} />
             : mcu.data?.length ? (
@@ -159,13 +167,15 @@ export default function Beranda() {
       {/* -------------------------------------------------------- dokter */}
       <section className="seksi">
         <div className="wadah">
-          <div className="baris baris--antara judul-seksi" style={{ maxWidth: 'none' }}>
-            <div>
-              <span className="eyebrow">Tim Medis</span>
-              <h2>Dokter kami</h2>
+          <Reveal>
+            <div className="baris baris--antara judul-seksi" style={{ maxWidth: 'none' }}>
+              <div>
+                <span className="eyebrow">Tim Medis</span>
+                <h2>Dokter kami</h2>
+              </div>
+              <Link to="/dokter" className="btn btn--garis btn--kecil">Jadwal lengkap</Link>
             </div>
-            <Link to="/dokter" className="btn btn--garis btn--kecil">Jadwal lengkap</Link>
-          </div>
+          </Reveal>
 
           {dokter.memuat ? <KartuRangka jumlah={4} />
             : dokter.data?.length ? (
@@ -196,13 +206,15 @@ export default function Beranda() {
       {artikel.data?.length > 0 && (
         <section className="seksi seksi--lembut">
           <div className="wadah">
-            <div className="baris baris--antara judul-seksi" style={{ maxWidth: 'none' }}>
-              <div>
-                <span className="eyebrow">Informasi</span>
-                <h2>Artikel kesehatan</h2>
+            <Reveal>
+              <div className="baris baris--antara judul-seksi" style={{ maxWidth: 'none' }}>
+                <div>
+                  <span className="eyebrow">Informasi</span>
+                  <h2>Artikel kesehatan</h2>
+                </div>
+                <Link to="/artikel" className="btn btn--garis btn--kecil">Semua artikel</Link>
               </div>
-              <Link to="/artikel" className="btn btn--garis btn--kecil">Semua artikel</Link>
-            </div>
+            </Reveal>
             <Reveal className="kisi kisi--3">
               {artikel.data.map((a) => <KartuKonten key={a.id} modul="articles" item={a} />)}
             </Reveal>
@@ -211,7 +223,7 @@ export default function Beranda() {
       )}
 
       {/* --------------------------------------------------------- ajakan */}
-      <section className="ajakan">
+      <Reveal sebagai="section" className="ajakan">
         <div className="wadah ajakan__isi">
           <div>
             <h2 style={{ color: 'var(--putih)' }}>Butuh bantuan menentukan layanan?</h2>
@@ -231,7 +243,7 @@ export default function Beranda() {
             </Tombol>
           </div>
         </div>
-      </section>
+      </Reveal>
     </>
   )
 }

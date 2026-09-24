@@ -40,6 +40,56 @@
   border-radius: var(--r-xl);
   box-shadow: var(--bayang-3);
   aspect-ratio: 4 / 3;
+  /* Logo berlatar putih; tanpa ini tepi transparannya duduk di atas gradien
+     hero dan lambangnya kehilangan kontras. */
+  background: var(--putih);
+}
+
+/*
+ * Kemunculan logo.
+ *
+ * Satu gerakan saja: mengapung naik sambil membesar dari 92%, disertai
+ * sapuan cahaya yang lewat sekali. Logo adalah hal pertama yang dilihat
+ * pengunjung, jadi ia boleh diberi perhatian — tetapi sekali, lalu diam.
+ * Animasi yang berulang terus menarik mata menjauh dari teks di sebelahnya,
+ * yang justru berisi maksud kunjungannya.
+ */
+.hero__gambar {
+  position: relative;
+  animation: logoMasuk 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+}
+
+@keyframes logoMasuk {
+  from { opacity: 0; transform: translateY(24px) scale(0.92); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Sapuan cahaya sekali lewat, setelah logonya duduk. */
+.hero__gambar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-xl);
+  pointer-events: none;
+  background: linear-gradient(105deg,
+    transparent 38%,
+    rgba(255, 255, 255, 0.55) 48%,
+    transparent 58%);
+  background-size: 260% 100%;
+  background-position: 160% 0;
+  animation: logoKilau 1.1s ease-out 0.75s 1 both;
+}
+
+@keyframes logoKilau {
+  from { background-position: 160% 0; opacity: 1; }
+  to   { background-position: -60% 0; opacity: 0; }
+}
+
+/* Pengunjung yang meminta gerak dikurangi tetap mendapat logonya, tanpa
+   perjalanannya. */
+@media (prefers-reduced-motion: reduce) {
+  .hero__gambar { animation: none; }
+  .hero__gambar::after { display: none; }
 }
 
 @media (min-width: 900px) {

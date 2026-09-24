@@ -161,7 +161,17 @@ export function Info({ corak = 'info', judul, children }) {
  * Sebelum foto diunggah, yang tampil adalah pola bergaris bertuliskan
  * keterangan — bukan ikon gambar rusak yang terbaca sebagai situs bermasalah.
  */
-export function Gambar({ src, alt, rasio = '', keterangan = 'Foto belum tersedia' }) {
+/**
+ * Gambar berbingkai rasio tetap.
+ *
+ * `muat` menentukan perlakuan saat rasio gambar tidak sama dengan bingkainya:
+ *   'tutup' (bawaan) — memenuhi bingkai, sisi yang lebih panjang terpotong.
+ *                      Tepat untuk foto: yang penting bingkainya terisi penuh.
+ *   'penuh'          — seluruh gambar terlihat, sisanya jadi ruang kosong.
+ *                      Tepat untuk logo dan bagan, yang kehilangan maknanya
+ *                      begitu tepinya terpotong.
+ */
+export function Gambar({ src, alt, rasio = '', keterangan = 'Foto belum tersedia', muat = 'tutup' }) {
   // Status: muat (sedang dimuat) → siap | gagal; kosong bila tak ada src.
   // Selama memuat tampil kilau; bila gagal (mis. sumber lambat/mati) jatuh ke
   // penampung bermotif — bukan ikon gambar rusak yang terbaca seperti error.
@@ -170,7 +180,7 @@ export function Gambar({ src, alt, rasio = '', keterangan = 'Foto belum tersedia
   const kosong = status === 'kosong' || status === 'gagal'
 
   return (
-    <div className={`gambar-rasio ${rasio}`}>
+    <div className={`gambar-rasio ${rasio} ${muat === 'penuh' ? 'gambar-rasio--penuh' : ''}`}>
       {src && !kosong && (
         <img
           src={src}
