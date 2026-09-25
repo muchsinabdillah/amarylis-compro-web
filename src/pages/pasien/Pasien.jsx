@@ -9,6 +9,7 @@ import Dashboard from './Dashboard'
 import ReservasiBaru from './ReservasiBaru'
 import Paket from './Paket'
 import Pesanan from './Pesanan'
+import HasilMcu from './HasilMcu'
 import VerifikasiRM from './VerifikasiRM'
 
 function Isi() {
@@ -44,6 +45,7 @@ function Isi() {
         <Route path="reservasi/baru" element={<ReservasiBaru />} />
         <Route path="paket" element={<Paket />} />
         <Route path="pesanan" element={<Pesanan />} />
+        <Route path="hasil-mcu" element={<HasilMcu />} />
         <Route path="*" element={<Navigate to="/pasien" replace />} />
       </Route>
     </Routes>

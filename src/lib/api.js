@@ -243,6 +243,13 @@ export const pasien = {
   pesanan:       (o) => api.get('/api/pasien/pesanan', o),
   pesananBuat:   (isi) => api.post('/api/pasien/pesanan', isi),
   pesananBatal:  (id) => api.post(`/api/pasien/pesanan/${id}/batal`),
+
+  // Hasil MCU milik sendiri. No. RM tidak pernah dikirim dari sini —
+  // backend mengambilnya dari sesi, supaya nomor orang lain tidak bisa
+  // disisipkan hanya dengan mengubah permintaan di peramban.
+  mcuHasil:       (o) => api.get('/api/pasien/mcu/hasil', o),
+  mcuHasilDetail: (noMcu, o) => api.get(`/api/pasien/mcu/hasil/${encodeURIComponent(noMcu)}`, o),
+  mcuTren:        (o) => api.get('/api/pasien/mcu/tren', o),
 }
 
 /* =====================================================================

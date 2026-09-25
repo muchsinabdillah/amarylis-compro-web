@@ -25,6 +25,7 @@ const NAV = [
   { ke: '/pasien/reservasi/baru', label: 'Buat Reservasi', ikon: 'reservasi' },
   { ke: '/pasien/paket',          label: 'Paket & MCU',  ikon: 'paket' },
   { ke: '/pasien/pesanan',        label: 'Pesanan Saya', ikon: 'pesanan' },
+  { ke: '/pasien/hasil-mcu',      label: 'Hasil MCU',    ikon: 'hasil' },
 ]
 
 export default function Kerangka() {
