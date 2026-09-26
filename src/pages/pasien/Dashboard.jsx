@@ -28,6 +28,10 @@ export default function Dashboard() {
   const { profil } = usePasien()
   const reservasi = useMuat((o) => pasien.reservasi(o), [])
   const pesanan = useMuat((o) => pasien.pesanan(o), [])
+  // Riwayat angka MCU. Gagal memuatnya TIDAK ditampilkan sebagai galat:
+  // akun yang belum tertaut rekam medik memang tidak punya apa pun di sini,
+  // dan itu keadaan normal, bukan kerusakan.
+  const tren = useMuat((o) => pasien.mcuTren(o).catch(() => []), [])
   const [sibukId, setSibukId] = useState(null)
   useSeo({ judul: 'Dashboard Pasien' })
   const hariIni = new Date().toISOString().slice(0, 10)
@@ -115,6 +119,11 @@ export default function Dashboard() {
         </Bagian>
       )}
 
+      {/* Kesehatan dari MCU — ringkasan hasil terakhir beserta arah perubahannya.
+          Sengaja di ATAS transaksi paket: yang dicari orang saat membuka
+          dasbornya adalah kondisinya, bukan tagihannya. */}
+      {!memuat && (tren.data || []).length > 0 && <RingkasKesehatan tren={tren.data} />}
+
       {/* Transaksi MCU & paket */}
       {!memuat && !reservasi.galat && (
         <Bagian judul="Transaksi MCU & Paket" jumlah={(pesanan.data || []).length}
@@ -156,6 +165,94 @@ export default function Dashboard() {
 }
 
 /* ---------------------------------------------------------------- bagian */
+const KELAYAKAN_LABEL = {
+  FIT: 'Layak bekerja', FIT_RESTRICTION: 'Layak dengan catatan',
+  TEMPORARILY_UNFIT: 'Belum layak sementara', UNFIT: 'Tidak layak',
+  PENDING: 'Menunggu pemeriksaan',
+}
+
+/** Arah perubahan satu angka: turun/naik/sama. Tanpa warna "baik/buruk" —
+ *  naiknya tekanan darah buruk, naiknya berat belum tentu, dan menyimpulkan
+ *  itu di dasbor bukan tugas perangkat lunak. */
+function Arah({ sekarang, sebelum, satuan }) {
+  const a = Number(sekarang), b = Number(sebelum)
+  if (!isFinite(a)) return <span style={{ color: 'var(--teks-lembut)' }}>—</span>
+  const selisih = isFinite(b) ? a - b : null
+  const tanda = selisih == null || Math.abs(selisih) < 0.05 ? '' : (selisih > 0 ? '▲' : '▼')
+  return (
+    <span>
+      <b>{sekarang}</b>{satuan ? <span style={{ fontSize: 'var(--t-xs)', color: 'var(--teks-lembut)' }}> {satuan}</span> : null}
+      {tanda && (
+        <span style={{ marginLeft: 6, fontSize: 'var(--t-xs)', color: 'var(--teks-lembut)' }}>
+          {tanda} {Math.abs(selisih).toFixed(Math.abs(selisih) < 10 ? 1 : 0)} dari sebelumnya
+        </span>
+      )}
+    </span>
+  )
+}
+
+/**
+ * Ringkasan kesehatan dari MCU terakhir.
+ *
+ * Kelayakan kerja hanya muncul bila server mengirimkannya — dan server hanya
+ * mengirimkannya setelah dokter menandatangani. Draf tidak pernah sampai ke
+ * sini, jadi tidak ada yang perlu disaring ulang di layar.
+ */
+function RingkasKesehatan({ tren }) {
+  const [kini, lalu] = tren
+  const tgl = (t) => {
+    try {
+      return new Date(String(t).slice(0, 10) + 'T00:00:00')
+        .toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+    } catch { return String(t) }
+  }
+
+  return (
+    <Bagian judul="Kesehatan dari MCU"
+      aksi={<Tombol ke="/pasien/hasil-mcu" corak="garis" ukuran="kecil">Lihat hasil</Tombol>}>
+      <div style={{
+        border: '1px solid var(--garis)', borderRadius: 'var(--r-lg)',
+        padding: 'var(--s-4)', background: 'var(--putih)',
+      }}>
+        <div className="baris" style={{ justifyContent: 'space-between', alignItems: 'center', gap: 'var(--s-2)', flexWrap: 'wrap' }}>
+          <div style={{ fontSize: 'var(--t-sm)', color: 'var(--teks-lembut)' }}>
+            Pemeriksaan terakhir · {tgl(kini.TglMCU)}
+          </div>
+          {kini.StatusKelayakan
+            ? <Lencana corak={kini.StatusKelayakan === 'FIT' ? 'sukses'
+                : kini.StatusKelayakan === 'UNFIT' ? 'bahaya' : 'awas'}>
+                {KELAYAKAN_LABEL[kini.StatusKelayakan] || kini.StatusKelayakan}
+              </Lencana>
+            : <Lencana corak="abu">Menunggu tanda tangan dokter</Lencana>}
+        </div>
+
+        <div className="baris" style={{ gap: 'var(--s-5)', flexWrap: 'wrap', marginTop: 'var(--s-3)' }}>
+          <div>
+            <div style={{ fontSize: 'var(--t-xs)', color: 'var(--teks-lembut)' }}>Tekanan darah</div>
+            {kini.Sistol && kini.Diastol
+              ? <div><b>{kini.Sistol}/{kini.Diastol}</b><span style={{ fontSize: 'var(--t-xs)', color: 'var(--teks-lembut)' }}> mmHg</span></div>
+              : <div style={{ color: 'var(--teks-lembut)' }}>—</div>}
+          </div>
+          <div>
+            <div style={{ fontSize: 'var(--t-xs)', color: 'var(--teks-lembut)' }}>Indeks massa tubuh</div>
+            <div><Arah sekarang={kini.Bmi} sebelum={lalu?.Bmi} satuan={kini.GolonganBmi || ''} /></div>
+          </div>
+          <div>
+            <div style={{ fontSize: 'var(--t-xs)', color: 'var(--teks-lembut)' }}>Berat badan</div>
+            <div><Arah sekarang={kini.Bb} sebelum={lalu?.Bb} satuan="kg" /></div>
+          </div>
+        </div>
+
+        {tren.length > 1 && (
+          <div style={{ fontSize: 'var(--t-xs)', color: 'var(--teks-lembut)', marginTop: 'var(--s-3)' }}>
+            {tren.length} pemeriksaan tercatat — perkembangan lengkapnya ada di halaman Hasil MCU.
+          </div>
+        )}
+      </div>
+    </Bagian>
+  )
+}
+
 function Bagian({ judul, jumlah, aksi, children }) {
   return (
     <section className="tumpuk" style={{ gap: 'var(--s-3)' }}>
