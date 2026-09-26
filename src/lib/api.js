@@ -123,6 +123,50 @@ async function panggil(metode, jalur, { body, params, signal, formData } = {}) {
   return { data: json?.data ?? null, meta: json?.meta ?? null }
 }
 
+/**
+ * Unduh berkas (PDF) dengan token sesi yang sama.
+ *
+ * Tidak lewat panggil(): fungsi itu selalu mengurai jawaban sebagai JSON,
+ * sedangkan yang datang di sini berkas biner. Yang tetap disamakan: pemilihan
+ * token menurut area jalur, dan penolakan 401 mengeluarkan sesi yang benar.
+ *
+ * Penolakan dari server TETAP berupa JSON walau kita minta berkas — dibaca
+ * lebih dulu supaya pesannya ("belum ditandatangani dokter") sampai ke
+ * pengguna, bukan tersimpan sebagai PDF rusak yang membingungkan.
+ */
+export async function unduhBerkas(jalur) {
+  const area = areaJalur(jalur)
+  const slot = area === 'pasien' ? tokenPasien : area === 'perusahaan' ? tokenPerusahaan : token
+  const t = slot.ambil()
+
+  let res
+  try {
+    res = await fetch(DASAR + jalur, { headers: t ? { Authorization: `Bearer ${t}` } : {} })
+  } catch {
+    throw new GalatApi('Tidak dapat menghubungi server. Periksa sambungan internet Anda.', 0)
+  }
+
+  const tipe = res.headers.get('content-type') || ''
+  if (!res.ok || !tipe.includes('pdf')) {
+    if (res.status === 401) {
+      const keluar = area === 'pasien' ? saatTakSahPasien
+        : area === 'perusahaan' ? saatTakSahPerusahaan : saatTakSah
+      if (keluar) keluar()
+    }
+    let pesan = 'Berkas tidak dapat dibuat.'
+    try { pesan = (await res.json())?.pesan || pesan } catch { /* biarkan bawaan */ }
+    throw new GalatApi(pesan, res.status)
+  }
+
+  const nama = (res.headers.get('content-disposition') || '')
+    .match(/filename="?([^"]+)"?/)?.[1] || 'hasil-mcu.pdf'
+  const url = URL.createObjectURL(await res.blob())
+  const a = document.createElement('a')
+  a.href = url; a.download = nama
+  document.body.appendChild(a); a.click(); a.remove()
+  setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
+
 const api = {
   get:   (jalur, opsi) => panggil('GET', jalur, opsi),
   post:  (jalur, body, opsi) => panggil('POST', jalur, { ...opsi, body }),
@@ -250,6 +294,9 @@ export const pasien = {
   mcuHasil:       (o) => api.get('/api/pasien/mcu/hasil', o),
   mcuHasilDetail: (noMcu, o) => api.get(`/api/pasien/mcu/hasil/${encodeURIComponent(noMcu)}`, o),
   mcuTren:        (o) => api.get('/api/pasien/mcu/tren', o),
+  // Unduh laporan sebagai berkas. Alamatnya dibuka langsung lewat
+  // tautan bertoken supaya peramban yang mengurus pengunduhannya.
+  mcuLaporanPdf:  (noMcu) => unduhBerkas(`/api/pasien/mcu/hasil/${encodeURIComponent(noMcu)}/pdf`),
 }
 
 /* =====================================================================
@@ -259,6 +306,7 @@ export const pasien = {
    meneruskan email+sandi lalu memegang sesinya sendiri.
    ===================================================================== */
 export const perusahaan = {
+  mcuSertifikatPdf: (noMcu) => unduhBerkas(`/api/perusahaan/mcu/sertifikat/${encodeURIComponent(noMcu)}`),
   masuk: (isi) => api.post('/api/perusahaan/masuk', isi),
   saya:  (o) => api.get('/api/perusahaan/saya', o),
 

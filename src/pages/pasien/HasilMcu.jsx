@@ -63,6 +63,7 @@ function Angka({ label, nilai, satuan }) {
 function Detail({ noMcu, saatTutup }) {
   const [d, setD] = useState(null)
   const [galat, setGalat] = useState(null)
+  const [unduh, setUnduh] = useState(false)
 
   useEffect(() => {
     let batal = false
@@ -90,7 +91,20 @@ function Detail({ noMcu, saatTutup }) {
             {b.nama_perusahaan ? ` · ${b.nama_perusahaan}` : ''}
           </div>
         </div>
-        <button type="button" onClick={saatTutup} className="tbl tbl--garis tbl--kecil">Tutup</button>
+        <div className="baris" style={{ gap: 8 }}>
+          {b.hasil_siap && (
+            <button type="button" className="tbl tbl--garis tbl--kecil" disabled={unduh}
+              onClick={async () => {
+                setUnduh(true)
+                try { await pasien.mcuLaporanPdf(b.no_mcu) }
+                catch (e) { window.alert(e.message || 'Berkas gagal dibuat.') }
+                finally { setUnduh(false) }
+              }}>
+              {unduh ? 'Menyiapkan…' : 'Unduh PDF'}
+            </button>
+          )}
+          <button type="button" onClick={saatTutup} className="tbl tbl--garis tbl--kecil">Tutup</button>
+        </div>
       </div>
 
       {!b.hasil_siap && (

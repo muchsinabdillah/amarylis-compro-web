@@ -162,6 +162,9 @@ export default function Hasil() {
 }
 
 function IsiHasil({ d }) {
+  /* Membangkitkan PDF memakan waktu sepersekian detik; tanpa penanda, tombol
+     tampak tidak bereaksi dan orang menekannya berkali-kali. */
+  const [unduh, setUnduh] = useState(false)
   const k = d.kesimpulan
   const rekomendasi = daftarDari(k?.rekomendasi_perusahaan)
   const pembatasan = daftarDari(k?.pembatasan)
@@ -169,7 +172,22 @@ function IsiHasil({ d }) {
   return (
     <div className="hasil-panel">
       <div>
-        <h3>Kesimpulan pemeriksaan</h3>
+        <div className="baris" style={{ justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <h3 style={{ margin: 0 }}>Kesimpulan pemeriksaan</h3>
+          {/* Sertifikat hanya memuat kesimpulan kelayakan dan pembatasannya.
+              Rincian medis karyawan tidak ikut -- itu bukan hak pemberi kerja. */}
+          {k && d?.peserta?.no_mcu && (
+            <button type="button" className="tbl tbl--garis tbl--kecil" disabled={unduh}
+              onClick={async () => {
+                setUnduh(true)
+                try { await perusahaan.mcuSertifikatPdf(d.peserta.no_mcu) }
+                catch (e) { window.alert(e.message || 'Sertifikat gagal dibuat.') }
+                finally { setUnduh(false) }
+              }}>
+              {unduh ? 'Menyiapkan…' : 'Unduh Sertifikat (PDF)'}
+            </button>
+          )}
+        </div>
         {!k ? (
           <p className="mcu-samar" style={{ fontSize: 'var(--t-sm)' }}>
             Dokter belum menandatangani kesimpulan. Hasil akan muncul di sini setelah selesai.
