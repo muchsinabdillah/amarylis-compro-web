@@ -175,7 +175,12 @@ const KELAYAKAN_LABEL = {
  *  naiknya tekanan darah buruk, naiknya berat belum tentu, dan menyimpulkan
  *  itu di dasbor bukan tugas perangkat lunak. */
 function Arah({ sekarang, sebelum, satuan }) {
-  const a = Number(sekarang), b = Number(sebelum)
+  /* Number(null) bernilai 0, bukan NaN. Tanpa pemeriksaan kosong yang tegas,
+     pemeriksaan sebelumnya yang belum berisi dianggap NOL dan selisihnya
+     menjadi nilai penuhnya sendiri — layar sempat menulis "IMT 25,50 naik 26
+     dari sebelumnya", yang tidak berarti apa-apa dan menakutkan pembacanya. */
+  const angka = (v) => (v === null || v === undefined || v === '' ? NaN : Number(v))
+  const a = angka(sekarang), b = angka(sebelum)
   if (!isFinite(a)) return <span style={{ color: 'var(--teks-lembut)' }}>—</span>
   const selisih = isFinite(b) ? a - b : null
   const tanda = selisih == null || Math.abs(selisih) < 0.05 ? '' : (selisih > 0 ? '▲' : '▼')
