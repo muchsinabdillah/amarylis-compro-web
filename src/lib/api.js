@@ -319,6 +319,8 @@ export const perusahaan = {
 
   // Hasil & dasbor
   mcuRingkas:     (o) => api.get('/api/perusahaan/mcu/ringkas', o),
+  // grafik analisa kesehatan (angka gabungan) — params: { dari, sampai }
+  mcuDashboard:   (params, o) => api.get('/api/perusahaan/mcu/dashboard', { ...o, params }),
   mcuHasil:       (o) => api.get('/api/perusahaan/mcu/hasil', o),
   mcuHasilDetail: (id, o) => api.get(`/api/perusahaan/mcu/hasil/${id}`, o),
 }

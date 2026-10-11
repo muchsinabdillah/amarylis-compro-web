@@ -5,6 +5,7 @@ import { usePerusahaan } from '../../context/PerusahaanAuthContext'
 import { Memuat, Tombol } from '../../components/ui/Dasar'
 import useSeo from '../../lib/seo'
 import { Angka, CSS_MCU, Lencana, LENCANA_BATCH, tanggal } from './mcuKit'
+import AnalisaKesehatan from './AnalisaKesehatan'
 
 /**
  * Dasbor analisa perusahaan.
@@ -127,6 +128,8 @@ export default function Dashboard() {
               </p>
             </section>
           </div>
+
+          <AnalisaKesehatan />
 
           <section style={{ marginTop: 'var(--s-4)' }}>
             <div className="db-judul-baris">
