@@ -163,7 +163,7 @@ function Donat({ judul, data, total }) {
       <h3>{judul}</h3>
       {!isi.length ? <p className="mcu-samar ak-kecil">Belum ada data.</p> : (
         <div className="ak-donat">
-          <svg viewBox="0 0 120 120" width="116" height="116" role="img"
+          <svg viewBox="0 0 120 120" width="96" height="96" role="img"
             aria-label={`${judul}: ` + isi.map((x) => `${x.nama} ${x.n}`).join(', ')}>
             <circle cx="60" cy="60" r={R} fill="none" stroke="var(--hijau-50)" strokeWidth="15" />
             {isi.map((x, i) => {
@@ -231,15 +231,15 @@ const CSS = `
 .ak-dua { display:grid; grid-template-columns:1fr 1fr; gap:var(--s-3); margin-top:var(--s-3); }
 .ak-kartu h3 { font-size:var(--t-xs); text-transform:uppercase; letter-spacing:.04em; color:var(--teks-lembut); margin:0 0 var(--s-3); }
 .ak-kecil { font-size:var(--t-xs); margin:var(--s-2, 8px) 0 0; }
-.ak-donat { display:flex; gap:var(--s-3); align-items:center; }
+.ak-donat { display:flex; gap:var(--s-2, 8px); align-items:center; }
 .ak-donat svg { flex-shrink:0; }
 .ak-donat__n { font-size:22px; font-weight:800; fill:currentColor; }
 .ak-donat__l { font-size:10px; fill:var(--teks-lembut); }
 .ak-kunci { list-style:none; margin:0; padding:0; display:grid; gap:5px; font-size:var(--t-sm); flex:1; min-width:0; }
 .ak-kunci li { display:flex; align-items:center; gap:7px; }
-.ak-kunci__nama { flex:1; min-width:0; overflow-wrap:anywhere; }
+.ak-kunci__nama { flex:1; min-width:0; overflow-wrap:break-word; }
 .ak-kunci li b { font-variant-numeric:tabular-nums; }
-.ak-kunci__p { width:44px; text-align:right; font-variant-numeric:tabular-nums; flex-shrink:0; }
+.ak-kunci__p { width:40px; text-align:right; font-variant-numeric:tabular-nums; flex-shrink:0; }
 .ak-titik { width:10px; height:10px; border-radius:3px; flex-shrink:0; }
 .ak-batang { list-style:none; margin:0; padding:0; display:grid; gap:7px; font-size:var(--t-sm); }
 .ak-batang li { display:grid; grid-template-columns:minmax(0,1.4fr) minmax(60px,1fr) auto 44px; gap:8px; align-items:center; }
